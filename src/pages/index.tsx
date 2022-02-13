@@ -85,26 +85,26 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
   return (
     <>
       <Head>
-        <title> Blog | Math</title>
+        <title> Blog | SpaceTraveling</title>
       </Head>
       <main className={commonStyles.container}>
         <div>
           {posts.map(post => (
             <Link href={`/post/${post.uid}`} key={post.uid}>
-              <article className={styles.post}>
+              <a className={styles.post}>
                 <strong>{post.data.title}</strong>
                 <p>{post.data.subtitle}</p>
                 <div>
                   <time>
-                    <FiCalendar />
+                    <FiCalendar className={commonStyles.icon} />
                     {post.first_publication_date}
                   </time>
                   <span>
-                    <FiUser />
+                    <FiUser className={commonStyles.icon} />
                     {post.data.author}
                   </span>
                 </div>
-              </article>
+              </a>
             </Link>
           ))}
         </div>
@@ -129,11 +129,9 @@ export const getStaticProps: GetStaticProps = async () => {
   const postsResponse = await prismic.query(
     [Prismic.predicates.at('document.type', 'posts')],
     {
-      pageSize: 1,
+      pageSize: 2,
     }
   );
-
-  console.log(postsResponse);
 
   const posts = postsResponse.results.map(post => {
     return {

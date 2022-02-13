@@ -1,10 +1,15 @@
 
 .post {
 
-  cursor: pointer;
+  display: block;
+
+  & + & {
+    margin-top: 3rem;
+  }
 
   strong {
     color: var(--heading);
+
     font-weight: 700;
     font-size: 1.75rem;
     line-height: 2.125rem;
@@ -12,15 +17,22 @@
 
   p {
     margin-top: 0.5rem;
+
     font-size: 1.125rem;
     line-height: 1.175rem;
     font-weight: 400;
+
     color: var(--body);
   }
 
   div {
     margin-top: 1.5rem;
+
+    display: flex;
+    align-items: center;
+
     color: var(--info);
+
     font-size: 0.875rem;
     line-height: 1.063rem;
 
@@ -29,8 +41,8 @@
     }
   }
 
-  article + &  {
-    margin-top: 3rem;
+  &:last-child {
+    margin-bottom: 3rem;
   }
 
 }
