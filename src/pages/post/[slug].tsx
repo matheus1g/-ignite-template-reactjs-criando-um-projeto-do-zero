@@ -2,6 +2,7 @@
 /* eslint-disable no-return-assign */
 import Head from 'next/head';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 import { GetStaticPaths, GetStaticProps } from 'next';
 import { FiCalendar, FiUser, FiClock } from 'react-icons/fi';
 import { RichText } from 'prismic-dom';
@@ -17,6 +18,7 @@ import styles from './post.module.scss';
 interface Post {
   uid: string;
   first_publication_date: string | null;
+  last_publication_date: string | null;
   data: {
     title: string;
     banner: {
@@ -32,11 +34,19 @@ interface Post {
   };
 }
 
-interface PostProps {
-  post: Post;
+interface Nav {
+  previousPageTitle: string | null;
+  previousPageLink: string | null;
+  nextPageTitle: string | null;
+  nextPageLink: string | null;
 }
 
-export default function Post({ post }: PostProps): JSX.Element {
+interface PostProps {
+  post: Post;
+  nav: Nav;
+}
+
+export default function Post({ post, nav }: PostProps): JSX.Element {
   const totalWords = post.data.content.reduce((total, contentItem) => {
     total += contentItem.heading.split(' ').length;
 
@@ -60,6 +70,15 @@ export default function Post({ post }: PostProps): JSX.Element {
       locale: ptBR,
     }
   );
+  const formattedLastDate = format(
+    new Date(post.last_publication_date),
+    "'* editado em 'dd MMM yyyy', às 'HH:mm",
+    {
+      locale: ptBR,
+    }
+  );
+
+  const equalDate = post.last_publication_date !== post.first_publication_date;
 
   return (
     <>
@@ -81,6 +100,7 @@ export default function Post({ post }: PostProps): JSX.Element {
               <FiClock className={commonStyles.icon} /> {readTime} min
             </span>
           </div>
+          <p>{equalDate && formattedLastDate}</p>
         </div>
 
         {post.data.content.map(content => {
@@ -95,6 +115,29 @@ export default function Post({ post }: PostProps): JSX.Element {
             </article>
           );
         })}
+        <div className={styles.divisor} />
+        <section className={styles.navigation}>
+          {nav.previousPageTitle && (
+            <Link href={`/post/${nav.previousPageLink}`}>
+              <a>
+                <div>
+                  <h3>{nav.previousPageTitle}</h3>
+                  <span>Post anterior</span>
+                </div>
+              </a>
+            </Link>
+          )}
+          {nav.nextPageTitle && (
+            <Link href={`/post/${nav.nextPageLink}`}>
+              <a>
+                <div className={styles.nextPage}>
+                  <h3>{nav.nextPageTitle}</h3>
+                  <span>Proximo post</span>
+                </div>
+              </a>
+            </Link>
+          )}
+        </section>
       </main>
     </>
   );
@@ -127,9 +170,26 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const response = await prismic.getByUID('posts', String(slug), {});
 
+  const previousPost = (
+    await prismic.query(Prismic.predicates.at('document.type', 'posts'), {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date desc]',
+    })
+  ).results[0];
+
+  const nextPost = (
+    await prismic.query(Prismic.predicates.at('document.type', 'posts'), {
+      pageSize: 1,
+      after: `${response.id}`,
+      orderings: '[document.first_publication_date]',
+    })
+  ).results[0];
+
   const post = {
     uid: response.uid,
     first_publication_date: response.first_publication_date,
+    last_publication_date: response.last_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
@@ -146,9 +206,17 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
     },
   };
 
+  const nav = {
+    previousPageTitle: previousPost ? previousPost.data.title : null,
+    previousPageLink: previousPost ? previousPost.uid : null,
+    nextPageTitle: nextPost ? nextPost.data.title : null,
+    nextPageLink: nextPost ? nextPost.uid : null,
+  };
+
   return {
     props: {
       post,
+      nav,
     },
     redirect: 60 * 30, // 30 minutes
   };

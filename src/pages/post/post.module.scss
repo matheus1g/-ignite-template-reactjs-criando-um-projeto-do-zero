@@ -17,7 +17,7 @@
   div {
     display: flex;
 
-    margin: 1.563rem 0 4rem;
+    margin: 1.563rem 0 0.5rem;
 
     color: var(--info);
     font-size: 0.875rem;
@@ -26,9 +26,17 @@
       margin-left: 1.5rem;
     }
   }
+
+  p {
+    margin-bottom: 4rem;
+    font-style: italic;
+    font-weight: 400;
+    font-size: 0.875rem;
+  }
 }
 
 .post {
+  text-align: justify;
 
   h1 {
     font-size: 2.25rem;
@@ -50,7 +58,45 @@
     }
   }
 
+  div:last-child {
+    padding-bottom: 2rem;
+  }
+
   & + & {
     margin-top: 2.25rem;
   }
+}
+
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    padding: 4rem 0;
+
+
+  a:last-child {
+    text-align: right;
+  }
+
+  h3 {
+    font-weight: 400;
+    font-size: 1.125rem;
+    line-height: 1.313rem;
+    font-style: normal;
+    color: var(--heading);
+    margin-bottom: 0.5rem;
+  }
+
+  span {
+    font-weight: 600;
+    font-size: 1rem;
+    line-height: 1.188rem;
+    font-style: normal;
+    color: var(--highlight);
+  }
+}
+
+.divisor {
+  margin-top: 4rem;
+  border-top: 1px solid #d7d7d7;
+  opacity: 0.1;
 }
