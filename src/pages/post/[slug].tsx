@@ -44,10 +44,11 @@ interface Nav {
 
 interface PostProps {
   post: Post;
+  preview: boolean;
   nav: Nav;
 }
 
-export default function Post({ post, nav }: PostProps): JSX.Element {
+export default function Post({ post, preview, nav }: PostProps): JSX.Element {
   const totalWords = post.data.content.reduce((total, contentItem) => {
     total += contentItem.heading.split(' ').length;
 
@@ -139,7 +140,16 @@ export default function Post({ post, nav }: PostProps): JSX.Element {
             </Link>
           )}
         </section>
+
         <Comments />
+
+        {preview && (
+          <aside className={styles.footer}>
+            <Link href="/api/exit-preview">
+              <a>Sair do modo Preview</a>
+            </Link>
+          </aside>
+        )}
       </main>
     </>
   );
@@ -165,12 +175,18 @@ export const getStaticPaths: GetStaticPaths = async () => {
   };
 };
 
-export const getStaticProps: GetStaticProps = async ({ params }) => {
+export const getStaticProps: GetStaticProps = async ({
+  params,
+  preview = false,
+  previewData,
+}) => {
   const { slug } = params;
 
   const prismic = getPrismicClient();
 
-  const response = await prismic.getByUID('posts', String(slug), {});
+  const response = await prismic.getByUID('posts', String(slug), {
+    ref: previewData?.ref || null,
+  });
 
   const previousPost = (
     await prismic.query(Prismic.predicates.at('document.type', 'posts'), {
@@ -218,6 +234,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
   return {
     props: {
       post,
+      preview,
       nav,
     },
     redirect: 60 * 30, // 30 minutes
